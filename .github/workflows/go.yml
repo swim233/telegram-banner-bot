@@ -1,0 +1,40 @@
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        arch: [amd64, arm64]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
+
+    # Define environment variables for the platform
+    - name: Set GOARCH and GOOS
+      run: |
+        echo "GOARCH=${{ matrix.arch }}" >> $GITHUB_ENV
+        if [ ${{ matrix.os }} == "ubuntu-latest" ]; then
+          echo "GOOS=linux" >> $GITHUB_ENV
+        elif [ ${{ matrix.os }} == "windows-latest" ]; then
+          echo "GOOS=windows" >> $GITHUB_ENV
+        fi
+
+    - name: Build
+      run: go build -v -o myapp-${{ matrix.os }}-${{ matrix.arch }} ./...
+
+    - name: Test
+      run: go test -v ./...
