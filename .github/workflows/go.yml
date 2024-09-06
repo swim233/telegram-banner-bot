@@ -34,7 +34,7 @@ jobs:
         fi
 
     - name: Build
-      run: go build -v -o myapp-${{ matrix.os }}-${{ matrix.arch }} ./...
+      run: go build -v -o telegram-banner-bot-${{ matrix.os }}-${{ matrix.arch }} ./
 
     - name: Test
-      run: go test -v ./...
+      run: go test -v ./
