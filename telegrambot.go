@@ -74,32 +74,33 @@ func main() {
 
 			logger.Info("CheckID:%d", checkID)
 
-			user := bot.ListUserInfo(userID, groupID)
-			Chatinfo := fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
 			if bot.VerifiedUser(checkID, groupID, groupNameSrt.Title) {
-				/* 				type userInfo struct {
-				   					id        int64
-				   					name      string
-				   					groupid   int64
-				   					groupname string
-				   					status    string
-				   				}
-				*/
-
 				_, err = bot.Bot.BanChatMember(groupID, userID)
 				if err != nil {
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Failed to ban user: "+err.Error())
 					bot.Bot.Send(msg)
+					user := bot.ListUserInfo(userID, groupID)
+					Chatinfo := fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
+					msg1 := tgbotapi.NewMessage((update.Message.Chat.ID), Chatinfo)
+					bot.Bot.Send(msg1)
 					logger.Error("%s", err.Error())
 				} else {
+
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "User banned successfully!")
 					bot.Bot.Send(msg)
+					user := bot.ListUserInfo(userID, groupID)
+					Chatinfo := fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
+					msg1 := tgbotapi.NewMessage((update.Message.Chat.ID), Chatinfo)
+					bot.Bot.Send(msg1)
 				}
 			} else {
 				//fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s")
-				msg1 := tgbotapi.NewMessage((update.Message.Chat.ID), Chatinfo)
+
 				msg := tgbotapi.NewMessage((update.Message.Chat.ID), "You have no access to action")
 				bot.Bot.Send(msg)
+				user := bot.ListUserInfo(userID, groupID)
+				Chatinfo := fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
+				msg1 := tgbotapi.NewMessage((update.Message.Chat.ID), Chatinfo)
 				bot.Bot.Send(msg1)
 				logger.Error("Found access dinded ID:%d", update.Message.From.ID)
 			}
