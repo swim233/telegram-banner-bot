@@ -40,5 +40,5 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: telegram-banner-bot-${{ matrix.os }}-${{ matrix.arch }}
-        path: output-${{ matrix.os }}-${{ matrix.arch }}/telegram-bannber-bot-${{ matrix.os }}-${{ matrix.arch }}
+        name: upload bot
+        path: telegram-bannber-bot-${{ matrix.os }}-${{ matrix.arch }}
