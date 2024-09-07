@@ -33,6 +33,7 @@ func main() {
 	if bot.Err != nil {
 		logger.Error("%s", bot.Err)
 	}
+
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 600
 
