@@ -94,7 +94,6 @@ func main() {
 					bot.Bot.Send(msg1)
 				}
 			} else {
-				//fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s")
 
 				msg := tgbotapi.NewMessage((update.Message.Chat.ID), "You have no access to action")
 				bot.Bot.Send(msg)
