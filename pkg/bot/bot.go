@@ -134,3 +134,54 @@ func GetLogLevel(file string) (LogLevel int) {
 	}
 	return 1
 }
+
+type UserInfo struct {
+	Id        int64
+	Name      string
+	Groupid   int64
+	Groupname string
+	Status    string
+}
+
+// 列出用户信息
+func ListUserInfo(uid int64, gid int64) UserInfo {
+	var User UserInfo
+	User.Id = uid
+	User.Groupid = gid
+	USerconfig := tgbotapi.ChatConfigWithUser{
+		ChatID: gid,
+		UserID: uid,
+	}
+	chatMenberConfig := tgbotapi.GetChatMemberConfig{
+		ChatConfigWithUser: USerconfig,
+	}
+	getChatMenberBot, err := Bot.GetChatMember(chatMenberConfig)
+	if err != nil {
+		logger.Error("Fail to get chat menber:%s", err)
+
+	}
+	User.Status = getChatMenberBot.Status
+
+	ChatConfig := tgbotapi.ChatConfig{
+		ChatID: chatMenberConfig.ChatID,
+	}
+	chatConfig := tgbotapi.ChatInfoConfig{
+		ChatConfig: ChatConfig,
+	}
+
+	UserConfig := tgbotapi.ChatConfig{
+		ChatID: chatMenberConfig.UserID,
+	}
+	userConfig := tgbotapi.ChatInfoConfig{
+		ChatConfig: UserConfig,
+	}
+	chat, err := Bot.GetChat(chatConfig)
+	logger.Warn("%s", err)
+
+	userchat, err := Bot.GetChat(userConfig)
+	logger.Warn("%s", err)
+
+	User.Groupname = chat.Title
+	User.Name = userchat.UserName
+	return User
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"goBot/goUnits/logger/logger"
 	"goBot/pkg/bot"
 	"strconv"
@@ -8,10 +9,7 @@ import (
 	"time"
 
 	tgbotapi "github.com/ijnkawakaze/telegram-bot-api"
-	//tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
-
-// var bot.Bot, Err = tgbotapi.NewBotAPI(bot.GetToken("config.json"))
 
 type Config struct {
 	Token    string `json:"token"`
@@ -23,7 +21,7 @@ func main() {
 	if bot.Bot.Token == "" {
 		logger.Debug("%s", bot.Bot.Token)
 		logger.Error("Fail to read bot toke,please check config.json")
-		time.Sleep(10 * time.Microsecond)
+		time.Sleep(5 * time.Second)
 		return
 	}
 	logger.SetLogLevel(bot.GetLogLevel("config.json"))
@@ -71,9 +69,22 @@ func main() {
 				ChatConfig: tgbotapi.ChatConfig{ChatID: groupID},
 			}
 			groupNameSrt, _ := bot.Bot.GetChat(chatConfig)
+
 			checkID := update.Message.Chat.ID
+
 			logger.Info("CheckID:%d", checkID)
+
+			user := bot.ListUserInfo(userID, groupID)
+			Chatinfo := fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
 			if bot.VerifiedUser(checkID, groupID, groupNameSrt.Title) {
+				/* 				type userInfo struct {
+				   					id        int64
+				   					name      string
+				   					groupid   int64
+				   					groupname string
+				   					status    string
+				   				}
+				*/
 
 				_, err = bot.Bot.BanChatMember(groupID, userID)
 				if err != nil {
@@ -85,8 +96,11 @@ func main() {
 					bot.Bot.Send(msg)
 				}
 			} else {
+				//fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s")
+				msg1 := tgbotapi.NewMessage((update.Message.Chat.ID), Chatinfo)
 				msg := tgbotapi.NewMessage((update.Message.Chat.ID), "You have no access to action")
 				bot.Bot.Send(msg)
+				bot.Bot.Send(msg1)
 				logger.Error("Found access dinded ID:%d", update.Message.From.ID)
 			}
 		}
