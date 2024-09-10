@@ -13,10 +13,12 @@ var Bot *tgbotapi.BotAPI
 var Err error
 
 type Config struct {
-	Token    string `json:"token"`
-	Loglevel int    `json:"loglevel"`
+	Token       string `json:"token"`
+	Loglevel    int    `json:"loglevel"`
+	EnableDebug bool   `json:"enabledebug"`
 }
 
+// 检查配置文件
 func CheckConfigFile() bool {
 	cfginfo, err := os.Stat("config.json")
 	if err != nil {
@@ -52,6 +54,8 @@ func CheckConfigFile() bool {
 	}
 	return false
 }
+
+// 从配置文件获取token
 func GetToken(file string) (token string) {
 	if CheckConfigFile() {
 		configFile, err := os.Open(file)
@@ -77,6 +81,8 @@ func GetToken(file string) (token string) {
 	}
 
 }
+
+// 初始化bot
 func InitBot(file string) {
 	token := GetToken(file)
 	Bot, Err = tgbotapi.NewBotAPI(token)
@@ -86,6 +92,7 @@ func InitBot(file string) {
 	logger.Info("Authorized on account %s", Bot.Self.UserName)
 }
 
+// 验证用户权限
 func VerifiedUser(uid, gid int64, gname string) bool {
 	USerconfig := tgbotapi.ChatConfigWithUser{
 		ChatID: gid,
@@ -109,7 +116,8 @@ func VerifiedUser(uid, gid int64, gname string) bool {
 	return false
 }
 
-func GetLogLevel(file string) (LogLevel int) {
+// 获取日志等级
+func GetLogLevel(file string) (LogLevel int, EnableDebug bool) {
 
 	if CheckConfigFile() {
 		configFile, err := os.Open(file)
@@ -128,11 +136,12 @@ func GetLogLevel(file string) (LogLevel int) {
 			logger.Error("%s", err)
 		}
 		LogLevel = config.Loglevel
-		return LogLevel
+		EnableDebug = config.EnableDebug
+		return LogLevel, EnableDebug
 	} else {
 		logger.Error("Fail to read config, please check it")
 	}
-	return 1
+	return
 }
 
 type UserInfo struct {
