@@ -99,30 +99,6 @@ func InitBot(file string) {
 	logger.Info("Authorized on account %s", Bot.Self.UserName)
 }
 
-// 验证用户权限
-func VerifiedUser(uid, gid int64, gname string) bool {
-	USerconfig := tgbotapi.ChatConfigWithUser{
-		ChatID: gid,
-		UserID: uid,
-	}
-	chatMenberConfig := tgbotapi.GetChatMemberConfig{
-		ChatConfigWithUser: USerconfig,
-	}
-
-	getChatMenber, err := Bot.GetChatMember(chatMenberConfig)
-
-	if getChatMenber.Status == "creator" || getChatMenber.Status == "administrator" {
-		return true
-	}
-
-	if err != nil {
-
-		logger.Error("Get chat error: %s \n ChatId: %d \n UserId : %d \n gname : %s \n", err, gid, uid, gname)
-		//fmt.Printf("chatmenber :%s", getChatMenber)
-	}
-	return false
-}
-
 // 获取日志等级
 func GetLogLevel(file string) (LogLevel int, EnableDebug bool) {
 
