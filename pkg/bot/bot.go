@@ -71,7 +71,7 @@ func getConfig() {
 		}
 		defer configFile.Close()
 		var Config Config
-		Configptr := &Config
+		Configptr = &Config
 		decoder := json.NewDecoder(configFile)
 		if err := decoder.Decode(&Configptr); err != nil {
 			logger.Error("Error decoding config file: %s", err)
@@ -79,7 +79,6 @@ func getConfig() {
 
 		}
 	}
-	return
 }
 
 // 从配置文件获取token
