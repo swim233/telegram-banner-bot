@@ -12,9 +12,10 @@ import (
 )
 
 type Config struct {
-	Token       string `json:"token"`
-	Loglevel    int    `json:"loglevel"`
-	EnableDebug bool   `json:"enabledebug"`
+	Token               string `json:"token"`
+	Loglevel            int    `json:"loglevel"`
+	EnableDebug         bool   `json:"enable_debug"`
+	EnableActionMessage bool   `json:"enable_action_message"`
 }
 
 func main() {
@@ -22,7 +23,7 @@ func main() {
 	bot.InitBot("config.json")
 	if bot.Bot.Token == "" {
 		logger.Debug("%s", bot.Bot.Token)
-		logger.Error("Fail to read bot toke,please check config.json")
+		logger.Error("无法获取bot的token，请检查config.json")
 		time.Sleep(5 * time.Second)
 		return
 	}
@@ -49,7 +50,7 @@ func main() {
 		if update.Message.Chat.IsPrivate() && strings.HasPrefix(update.Message.Text, "/ban") {
 			args := strings.Split(update.Message.Text, " ")
 			if len(args) != 3 {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Usage: /ban <group_id> <user_id>")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "使用方法:/ban <群组id> <用户id>")
 				bot.Bot.Send(msg)
 
 				continue
@@ -59,14 +60,14 @@ func main() {
 			userIDStr := args[2]
 			groupID, err := strconv.ParseInt(groupIDStr, 10, 64)
 			if err != nil {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Invalid group_id format.")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "无效的群组id格式")
 				bot.Bot.Send(msg)
 				continue
 			}
 
 			userID, err := strconv.ParseInt(userIDStr, 10, 64)
 			if err != nil {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Invalid user_id format.")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "无效的用户id格式")
 				bot.Bot.Send(msg)
 				continue
 			}
@@ -83,24 +84,30 @@ func main() {
 			if bot.VerifiedUser(checkID, groupID, groupNameSrt.Title) {
 				_, err = bot.Bot.BanChatMember(groupID, userID)
 				if err != nil {
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Failed to ban user: "+err.Error())
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "无法封禁用户: "+err.Error())
 					bot.Bot.Send(msg)
 					user := bot.ListUserInfo(userID, groupID)
-					Chatinfo := fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
+					Chatinfo := fmt.Sprintf("ChatInfo \n  id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
 					msg1 := tgbotapi.NewMessage((update.Message.Chat.ID), Chatinfo)
 					bot.Bot.Send(msg1)
 					logger.Error("%s", err.Error())
+
 				} else {
 
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "User banned successfully!")
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "成功封禁用户!")
 					bot.Bot.Send(msg)
 					user := bot.ListUserInfo(userID, groupID)
 					Chatinfo := fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
 					msg1 := tgbotapi.NewMessage((update.Message.Chat.ID), Chatinfo)
 					bot.Bot.Send(msg1)
+
+					if bot.EnableActionMessage() {
+						msg := tgbotapi.NewMessage(user.Groupid, "用户"+user.Name+"已被封禁!")
+						bot.Bot.Send(msg)
+					}
 				}
 			} else {
-				msg := tgbotapi.NewMessage((update.Message.Chat.ID), "You have no access to action")
+				msg := tgbotapi.NewMessage((update.Message.Chat.ID), "你没有权限操作！")
 				bot.Bot.Send(msg)
 				user := bot.ListUserInfo(userID, groupID)
 				Chatinfo := fmt.Sprintf("ChatInfo id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
@@ -111,7 +118,7 @@ func main() {
 		}
 		//发送帮助信息
 		if update.Message.Chat.IsPrivate() && strings.HasPrefix(update.Message.Text, "/help") {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Usage: /ban <group_id> <user_id>")
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "使用方法:/ban <群组id> <用户id>")
 			bot.Bot.Send(msg)
 		}
 

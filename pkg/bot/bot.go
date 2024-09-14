@@ -7,16 +7,20 @@ import (
 	"time"
 
 	tgbotapi "github.com/ijnkawakaze/telegram-bot-api"
+	// "github.com/spf13/viper"
 )
 
 var Bot *tgbotapi.BotAPI
 var Err error
 
 type Config struct {
-	Token       string `json:"token"`
-	Loglevel    int    `json:"loglevel"`
-	EnableDebug bool   `json:"enabledebug"`
+	Token               string `json:"token"`
+	Loglevel            int    `json:"loglevel"`
+	EnableDebug         bool   `json:"enable_debug"`
+	EnableActionMessage bool   `json:"enable_action_message"`
 }
+
+var Configptr *Config
 
 // 检查配置文件
 func CheckConfigFile() bool {
@@ -28,8 +32,10 @@ func CheckConfigFile() bool {
 		time.Sleep(2 * time.Second)
 		// 创建新的配置
 		newconfig := Config{
-			Token:    "YOUR_BOT_TOKEN",
-			Loglevel: 1,
+			Token:               "YOUR_BOT_TOKEN",
+			Loglevel:            1,
+			EnableDebug:         true,
+			EnableActionMessage: false,
 		}
 
 		// 将配置转换为 JSON 格式
@@ -55,30 +61,32 @@ func CheckConfigFile() bool {
 	return false
 }
 
-// 从配置文件获取token
-func GetToken(file string) (token string) {
+// 加载配置文件
+func getConfig() {
+
 	if CheckConfigFile() {
-		configFile, err := os.Open(file)
+		configFile, err := os.Open("config.json")
 		if err != nil {
 			logger.Error("Error in reading config! \n Reason:%s", err)
 		}
 		defer configFile.Close()
-		var config Config
+		var Config Config
+		Configptr := &Config
 		decoder := json.NewDecoder(configFile)
-		if err := decoder.Decode(&config); err != nil {
+		if err := decoder.Decode(&Configptr); err != nil {
 			logger.Error("Error decoding config file: %s", err)
-			return ""
-		}
+			return
 
-		if err != nil {
-			logger.Error("%s", err)
 		}
-		token = config.Token
-		return token
-	} else {
-		logger.Error("Fail to read config, please check it")
-		return
 	}
+	return
+}
+
+// 从配置文件获取token
+func GetToken(file string) (token string) {
+	getConfig()
+	token = Configptr.Token
+	return token
 
 }
 
@@ -193,4 +201,11 @@ func ListUserInfo(uid int64, gid int64) UserInfo {
 	User.Groupname = chat.Title
 	User.Name = userchat.UserName
 	return User
+}
+
+// 获取是否ban人后发送群组提醒
+func EnableActionMessage() bool {
+	getConfig()
+	enableActionMessage := Configptr.EnableActionMessage
+	return enableActionMessage
 }
