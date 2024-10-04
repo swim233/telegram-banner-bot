@@ -39,11 +39,16 @@ func main() {
 	b.Run()
 }
 
+const (
+	Usage              = "使用方法:/ban <群组id> <用户id>"
+	InvalidGroupFormat = "无效的群组id格式"
+)
+
 // 封禁用户
 func banUserHandle(update tgbotapi.Update) error {
 	args := strings.Split(update.Message.CommandArguments(), " ")
 	if len(args) != 2 {
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "使用方法:/ban <群组id> <用户id>")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, Usage)
 		bot.Bot.Send(msg)
 		return fmt.Errorf("参数异常")
 	}
@@ -75,7 +80,7 @@ func banUserHandle(update tgbotapi.Update) error {
 			msg := tgbotapi.NewMessage(update.FromChat().ID, "无法封禁用户: "+err.Error())
 			bot.Bot.Send(msg)
 			user := bot.ListUserInfo(userID, groupID)
-			Chatinfo := fmt.Sprintf("ChatInfo \n  id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
+			Chatinfo := fmt.Sprintf("chatInfo \n  id:%d \n name:%s \n groupid:%d \n groupname:%s \n status:%s", user.Id, user.Name, user.Groupid, user.Groupname, user.Status)
 			msg1 := tgbotapi.NewMessage(update.FromChat().ID, Chatinfo)
 			bot.Bot.Send(msg1)
 			logger.Error("%s", err.Error())
