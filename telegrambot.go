@@ -70,11 +70,11 @@ func banUserHandle(update tgbotapi.Update) error {
 	}
 
 	//检查/记录id
-	checkID := update.FromChat().ID
+	checkID := update.SentFrom().ID
 	logger.Info("CheckID:%d", checkID)
 
 	//检查操作用户权限
-	if bot.Bot.IsAdminWithPermissions(checkID, groupID, tgbotapi.AdminCanRestrictMembers) {
+	if bot.Bot.IsAdminWithPermissions(groupID, checkID, tgbotapi.AdminCanRestrictMembers) {
 		_, err := bot.Bot.BanChatMember(groupID, userID)
 		if err != nil {
 			msg := tgbotapi.NewMessage(update.FromChat().ID, "无法封禁用户: "+err.Error())
@@ -137,10 +137,10 @@ func unBanUserHandle(update tgbotapi.Update) error {
 	}
 
 	//检查/记录id
-	checkID := update.FromChat().ID
+	checkID := update.SentFrom().ID
 	logger.Info("CheckID:%d", checkID)
 
-	if bot.Bot.IsAdminWithPermissions(checkID, groupID, tgbotapi.AdminCanRestrictMembers) {
+	if bot.Bot.IsAdminWithPermissions(groupID, checkID, tgbotapi.AdminCanRestrictMembers) {
 		_, err := bot.Bot.UnbanChatMember(groupID, userID)
 		if err != nil {
 			msg := tgbotapi.NewMessage(update.FromChat().ID, "无法解除封禁用户: "+err.Error())
@@ -174,7 +174,7 @@ func unBanUserHandle(update tgbotapi.Update) error {
 
 // 发送帮助
 func helpHandle(update tgbotapi.Update) error {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "使用方法:/ban <群组id> <用户id>")
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, Usage)
 	bot.Bot.Send(msg)
 	return nil
 }
